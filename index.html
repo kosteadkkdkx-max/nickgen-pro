@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>NickGen Pro - Генератор Никнеймов</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin:0;
+    padding:0;
+    background: linear-gradient(135deg, #0a0a0a, #111);
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    min-height:100vh;
+    padding-top:50px;
+  }
+
+  h1 {
+    font-size:3em;
+    color:#00ffcc;
+    margin-bottom:5px;
+    text-shadow:0 0 10px #00ffcc;
+  }
+
+  p.creator {
+    color:#888;
+    margin-bottom:30px;
+  }
+
+  .nicks, .history {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    margin:10px 0;
+  }
+
+  .nick, .history div {
+    font-size:1.5em;
+    color:#ffdd00;
+    margin:5px 0;
+    padding:8px 15px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:0.3s;
+  }
+
+  .nick:hover {
+    background:#00ffcc;
+    color:#111;
+    transform: scale(1.05);
+  }
+
+  button {
+    padding:12px 30px;
+    font-size:1.1em;
+    margin:5px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:#00ffcc;
+    color:#111;
+    font-weight:bold;
+    transition:0.3s;
+  }
+
+  button:hover {
+    background:#ffdd00;
+    color:#111;
+    transform: scale(1.05);
+  }
+
+  .buttons {
+    margin:20px 0;
+  }
+
+  @media (max-width:600px){
+    h1{ font-size:2em; }
+    .nick, .history div{ font-size:1.2em; }
+    button{ padding:10px 20px; font-size:1em; }
+  }
+</style>
+</head>
+
+<body>
+  <h1>🎮 NickGen Pro</h1>
+  <p class="creator">Создатель: Константин Петровский</p>
+
+  <div class="buttons">
+    <button onclick="generateNicks()">Сгенерировать 5 ников</button>
+    <button onclick="downloadNicks()">Скачать все ники</button>
+    <button onclick="clearHistory()">Очистить историю</button>
+  </div>
+
+  <div class="nicks" id="nicks"></div>
+
+  <h3>История последних ников:</h3>
+  <div class="history" id="history"></div>
+
+<script>
+const firstWords = ["Shadow","Dark","Crazy","Mega","Ultra","Royal","Ghost","Fire","Ice","Silent"];
+const secondWords = ["Player","Hunter","Wolf","Tiger","Dragon","Master","King","Storm","Blade","Sniper"];
+let history = JSON.parse(localStorage.getItem('nickHistory')) || [];
+let allNicks = [];
+
+function generateNicks(){
+  const nicksContainer = document.getElementById('nicks');
+  nicksContainer.innerHTML = '';
+  for(let i=0;i<5;i++){ 
+    const first = firstWords[Math.floor(Math.random()*firstWords.length)];
+    const second = secondWords[Math.floor(Math.random()*secondWords.length)];
+    const nick = first + second;
+    allNicks.push(nick);
+    history.push(nick);
+    if(history.length>20) history.shift();
+    const div = document.createElement('div');
+    div.className='nick';
+    div.innerText=nick;
+    div.onclick=()=>copyNick(nick);
+    nicksContainer.appendChild(div);
+  }
+  updateHistory();
+  localStorage.setItem('nickHistory', JSON.stringify(history));
+}
+
+function updateHistory(){
+  const historyContainer = document.getElementById('history');
+  historyContainer.innerHTML='';
+  history.slice().reverse().forEach(nick=>{
+    const div=document.createElement('div');
+    div.innerText=nick;
+    historyContainer.appendChild(div);
+  });
+}
+
+function copyNick(nick){
+  navigator.clipboard.writeText(nick).then(()=>alert(`Скопировано: ${nick}`));
+}
+
+function downloadNicks(){
+  if(allNicks.length===0){ alert('Нет сгенерированных ников!'); return; }
+  const blob = new Blob([allNicks.join('\n')], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='nicknames.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function clearHistory(){
+  history=[];
+  localStorage.setItem('nickHistory', JSON.stringify(history));
+  updateHistory();
+}
+
+updateHistory();
+</script>
+</body>
+</html>
